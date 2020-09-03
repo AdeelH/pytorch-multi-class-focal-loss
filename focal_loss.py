@@ -70,3 +70,17 @@ class FocalLoss(nn.Module):
             loss = loss.sum()
 
         return loss
+
+
+def focal_loss(alpha=None, gamma=0., reduction='mean', ignore_index=-100,
+				device='cpu', dtype=torch.float32):
+	if not ((alpha is None) or isinstance(alpha, torch.Tensor)):
+		alpha = torch.tensor(alpha, device=device, dtype=dtype)
+
+	fl = FocalLoss(
+		alpha=alpha,
+		gamma=gamma,
+		reduction=reduction,
+		ignore_index=ignore_index
+	)
+	return fl

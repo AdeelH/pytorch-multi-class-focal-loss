@@ -32,3 +32,18 @@ focal_loss = torch.hub.load(
 x, y = torch.randn(10, 2), (torch.rand(10) > .5).long()
 loss = focal_loss(x, y)
 ```
+Or:
+```python3
+focal_loss = torch.hub.load(
+	github='adeelh/pytorch-multi-class-focal-loss',
+	model='focal_loss',
+	alpha=[.75, .25],
+	gamma=2,
+	reduction='mean',
+	device='cpu',
+	dtype=torch.float32,
+	force_reload=False
+)
+x, y = torch.randn(10, 2), (torch.rand(10) > .5).long()
+loss = focal_loss(x, y)
+```
