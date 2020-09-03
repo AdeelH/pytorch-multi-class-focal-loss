@@ -1,4 +1,4 @@
-# pytorch-multi-class-focal-loss
+# Multi-class Focal Loss
 
 An implementation of Focal Loss, as described in the RetinaNet paper, https://arxiv.org/abs/1708.02002, generalized to the multi-class case.
 
