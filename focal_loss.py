@@ -16,7 +16,6 @@ class FocalLoss(nn.Module):
         - x: (batch_size, C) or (batch_size, C, d1, d2, ..., dK), K > 0.
         - y: (batch_size,) or (batch_size, d1, d2, ..., dK), K > 0.
     """
-
     def __init__(self,
                  alpha: Tensor = None,
                  gamma: float = 0.,
@@ -32,8 +31,9 @@ class FocalLoss(nn.Module):
         """
         super().__init__()
         self.gamma = gamma
-        self.nll_loss = nn.NLLLoss(
-            weight=alpha, reduction='none', ignore_index=ignore_index)
+        self.nll_loss = nn.NLLLoss(weight=alpha,
+                                   reduction='none',
+                                   ignore_index=ignore_index)
 
         if reduction in ('mean', 'sum', 'none'):
             self.reduction = reduction
@@ -72,15 +72,17 @@ class FocalLoss(nn.Module):
         return loss
 
 
-def focal_loss(alpha=None, gamma=0., reduction='mean', ignore_index=-100,
-				device='cpu', dtype=torch.float32):
-	if not ((alpha is None) or isinstance(alpha, torch.Tensor)):
-		alpha = torch.tensor(alpha, device=device, dtype=dtype)
+def focal_loss(alpha=None,
+               gamma=0.,
+               reduction='mean',
+               ignore_index=-100,
+               device='cpu',
+               dtype=torch.float32):
+    if not ((alpha is None) or isinstance(alpha, torch.Tensor)):
+        alpha = torch.tensor(alpha, device=device, dtype=dtype)
 
-	fl = FocalLoss(
-		alpha=alpha,
-		gamma=gamma,
-		reduction=reduction,
-		ignore_index=ignore_index
-	)
-	return fl
+    fl = FocalLoss(alpha=alpha,
+                   gamma=gamma,
+                   reduction=reduction,
+                   ignore_index=ignore_index)
+    return fl
