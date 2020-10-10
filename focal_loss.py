@@ -1,3 +1,5 @@
+import math
+
 import torch
 from torch import Tensor
 from torch import nn
@@ -51,6 +53,13 @@ class FocalLoss(nn.Module):
 
         # compute weighted cross entropy term: -alpha * log(pt)
         log_p = F.log_softmax(x, dim=-1)
+        if self.nll_loss.ignore_index == x.shape[1]:
+            ignore_column = torch.tensor(log_p.shape[0] * [-math.inf],
+                                         dtype=log_p.dtype,
+                                         device=log_p.device)
+            ignore_column = torch.reshape(ignore_column, (-1, 1))
+            log_p = torch.cat([log_p, ignore_column], dim=1)
+
         ce = self.nll_loss(log_p, y)
 
         # get true class column from each row
