@@ -35,6 +35,8 @@ class FocalLoss(nn.Module):
         self.nll_loss = nn.NLLLoss(
             weight=alpha, reduction='none', ignore_index=ignore_index)
 
+        self.ignore_index = ignore_index
+
         if reduction in ('mean', 'sum', 'none'):
             self.reduction = reduction
         else:
@@ -48,6 +50,12 @@ class FocalLoss(nn.Module):
             x = x.permute(0, *range(2, x.ndim), 1).reshape(-1, c)
             # (N, d1, d2, ..., dK) --> (N * d1 * ... * dK,)
             y = y.view(-1)
+
+        unignored_mask = y != self.ignore_index
+        y = y[unignored_mask]
+        if len(y) == 0:
+            return 0.
+        x = x[unignored_mask]
 
         # compute weighted cross entropy term: -alpha * log(pt)
         log_p = F.log_softmax(x, dim=-1)
