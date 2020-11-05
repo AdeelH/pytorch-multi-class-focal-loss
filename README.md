@@ -1,3 +1,5 @@
+[![DOI](https://zenodo.org/badge/292520399.svg)](https://zenodo.org/badge/latestdoi/292520399)
+
 # Multi-class Focal Loss
 
 An implementation of Focal Loss, as described in the RetinaNet paper, https://arxiv.org/abs/1708.02002, generalized to the multi-class case.
