@@ -1,3 +1,5 @@
+from typing import Optional, Sequence
+
 import torch
 from torch import Tensor
 from torch import nn
@@ -18,30 +20,40 @@ class FocalLoss(nn.Module):
     """
 
     def __init__(self,
-                 alpha: Tensor = None,
+                 alpha: Optional[Tensor] = None,
                  gamma: float = 0.,
                  reduction: str = 'mean',
                  ignore_index: int = -100):
         """Constructor.
+
         Args:
-            alpha (Tensor): Weights for each class.
-            gamma (float): A constant, as described in the paper.
+            alpha (Tensor, optional): Weights for each class. Defaults to None.
+            gamma (float, optional): A constant, as described in the paper.
+                Defaults to 0.
             reduction (str, optional): 'mean', 'sum' or 'none'.
                 Defaults to 'mean'.
             ignore_index (int, optional): class label to ignore.
+                Defaults to -100.
         """
+        if reduction not in ('mean', 'sum', 'none'):
+            raise ValueError(
+                'Reduction must be one of: "mean", "sum", "none".')
+
         super().__init__()
+        self.alpha = alpha
         self.gamma = gamma
+        self.ignore_index = ignore_index
+        self.reduction = reduction
+
         self.nll_loss = nn.NLLLoss(
             weight=alpha, reduction='none', ignore_index=ignore_index)
 
-        self.ignore_index = ignore_index
-
-        if reduction in ('mean', 'sum', 'none'):
-            self.reduction = reduction
-        else:
-            raise ValueError(
-                'Reduction must be one of: "mean", "sum", "none".')
+    def __repr__(self):
+        arg_keys = ['alpha', 'gamma', 'ignore_index', 'reduction']
+        arg_vals = [self.__dict__[k] for k in arg_keys]
+        arg_strs = [f'{k}={v}' for k, v in zip(arg_keys, arg_vals)]
+        arg_str = ', '.join(arg_strs)
+        return f'{type(self).__name__}({arg_str})'
 
     def forward(self, x: Tensor, y: Tensor) -> Tensor:
         if x.ndim > 2:
@@ -58,6 +70,7 @@ class FocalLoss(nn.Module):
         x = x[unignored_mask]
 
         # compute weighted cross entropy term: -alpha * log(pt)
+        # (alpha is already part of self.nll_loss)
         log_p = F.log_softmax(x, dim=-1)
         ce = self.nll_loss(log_p, y)
 
@@ -80,15 +93,38 @@ class FocalLoss(nn.Module):
         return loss
 
 
-def focal_loss(alpha=None, gamma=0., reduction='mean', ignore_index=-100,
-				device='cpu', dtype=torch.float32):
-	if not ((alpha is None) or isinstance(alpha, torch.Tensor)):
-		alpha = torch.tensor(alpha, device=device, dtype=dtype)
+def focal_loss(alpha: Optional[Sequence] = None,
+               gamma: float = 0.,
+               reduction: str = 'mean',
+               ignore_index: int = -100,
+               device='cpu',
+               dtype=torch.float32) -> FocalLoss:
+    """Factory function for FocalLoss.
 
-	fl = FocalLoss(
-		alpha=alpha,
-		gamma=gamma,
-		reduction=reduction,
-		ignore_index=ignore_index
-	)
-	return fl
+    Args:
+        alpha (Sequence, optional): Weights for each class. Will be converted
+            to a Tensor if not None. Defaults to None.
+        gamma (float, optional): A constant, as described in the paper.
+            Defaults to 0.
+        reduction (str, optional): 'mean', 'sum' or 'none'.
+            Defaults to 'mean'.
+        ignore_index (int, optional): class label to ignore.
+            Defaults to -100.
+        device (str, optional): Device to move alpha to. Defaults to 'cpu'.
+        dtype (torch.dtype, optional): dtype to cast alpha to.
+            Defaults to torch.float32.
+
+    Returns:
+        A FocalLoss object
+    """
+    if alpha is not None:
+        if not isinstance(alpha, Tensor):
+            alpha = torch.tensor(alpha)
+        alpha = alpha.to(device=device, dtype=dtype)
+
+    fl = FocalLoss(
+        alpha=alpha,
+        gamma=gamma,
+        reduction=reduction,
+        ignore_index=ignore_index)
+    return fl
