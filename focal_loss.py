@@ -30,18 +30,25 @@ class FocalLoss(nn.Module):
                 Defaults to 'mean'.
             ignore_index (int, optional): class label to ignore.
         """
+        if reduction not in ('mean', 'sum', 'none'):
+            raise ValueError(
+                'Reduction must be one of: "mean", "sum", "none".')
+
         super().__init__()
+        self.alpha = alpha
         self.gamma = gamma
+        self.ignore_index = ignore_index
+        self.reduction = reduction
+
         self.nll_loss = nn.NLLLoss(
             weight=alpha, reduction='none', ignore_index=ignore_index)
 
-        self.ignore_index = ignore_index
-
-        if reduction in ('mean', 'sum', 'none'):
-            self.reduction = reduction
-        else:
-            raise ValueError(
-                'Reduction must be one of: "mean", "sum", "none".')
+    def __repr__(self):
+        arg_keys = ['alpha', 'gamma', 'ignore_index', 'reduction']
+        arg_vals = [self.__dict__[k] for k in arg_keys]
+        arg_strs = [f'{k}={v}' for k, v in zip(arg_keys, arg_vals)]
+        arg_str = ', '.join(arg_strs)
+        return f'{type(self).__name__}({arg_str})'
 
     def forward(self, x: Tensor, y: Tensor) -> Tensor:
         if x.ndim > 2:
