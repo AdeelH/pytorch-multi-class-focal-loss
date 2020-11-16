@@ -24,7 +24,7 @@ It is essentially an enhancement to cross-entropy loss and is useful for classif
 This repo supports importing modules through `torch.hub`. `FocalLoss` can be easily imported into your code via, for example:
 ```python3
 focal_loss = torch.hub.load(
-	repo_or_dir='adeelh/pytorch-multi-class-focal-loss',
+	'adeelh/pytorch-multi-class-focal-loss',
 	model='FocalLoss',
 	alpha=torch.tensor([.75, .25]),
 	gamma=2,
@@ -37,7 +37,7 @@ loss = focal_loss(x, y)
 Or:
 ```python3
 focal_loss = torch.hub.load(
-	repo_or_dir='adeelh/pytorch-multi-class-focal-loss',
+	'adeelh/pytorch-multi-class-focal-loss',
 	model='focal_loss',
 	alpha=[.75, .25],
 	gamma=2,
