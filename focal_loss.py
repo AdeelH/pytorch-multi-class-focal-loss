@@ -66,7 +66,7 @@ class FocalLoss(nn.Module):
         unignored_mask = y != self.ignore_index
         y = y[unignored_mask]
         if len(y) == 0:
-            return 0.
+            return torch.tensor(0.)
         x = x[unignored_mask]
 
         # compute weighted cross entropy term: -alpha * log(pt)
